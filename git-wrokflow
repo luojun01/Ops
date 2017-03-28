@@ -1,0 +1,152 @@
+Sample Workflow
+
+Here is a sample workflow using the commands discussed in the presentation:
+
+git config --global user.name "Your Name"
+git config --global user.email "user@jun.com"
+git config --global core.editor emacs
+git clone git@git-test.labs.jun.com:test-group1/g1p1.git
+
+
+git pull                       // Get the latest code
+git branch testbranch          // Create a branch
+git branch                     // Look at existing branches
+git checkout testbranch        // Switch to the branch
+vi aFile.java                  // Edit some code
+git diff                       // Look at what has changed
+git status                     // Shows what branch you are on, what has changed, what is in the staging area, etc.
+git add                        // Add a file to the staging area
+git status                     // Look at the difference in the status
+git commit                     // Create a commit using the changes in the staging area
+git log                        // See that our commit has been added to the log
+git checkout master            // Switch to the master branch
+git pull                       // Get the latest code
+git checkout testbranch        // Switch to testbranch
+git rebase master              // Replay local commit on top of the latest code
+git checkout master            // Switch to the master branch
+git merge testbranch           // Merge changes with master
+git push                       // Push your patch out for public consumption
+git branch -d testbranch       // Delete the branch
+
+
+Resolve a Conflict
+
+git branch branch1                  // Create a branch
+
+// Creating a conflict just for an example. You would not normally do this.
+git branch branch2                  // Create another branch
+git checkout branch1                // Check out the first branch
+vi App.java                         // Edit a file - add a comment
+git commit -a -m "Added a comment"  // Commit all changes and add comment
+                                      (Replaces 'git add <files>', 'git commit', add comment in editor
+git checkout branch2                // Check out the second branch
+vi App.java                         // Edit the file - add a conflicting comment
+git commit -a -m "ADDED A COMMENT"  // Commit all changes and add comment
+git log                             // Look at the log
+git checkout master                 // Check out the master branch
+git branch                          // Look at existing branches
+git merge branch1                   // Merge changes from first branch to master
+git log                             // Look at the log
+
+// This is back to the normal workflow. At this point, you would have created a
+// commit on branch2, then switched to the master branch and pulled the latest code.
+// Then...
+git checkout branch2                // Check out the second branch
+git rebase master                   // Replay local commit on top of the lastest code
+git status                          // Look at the status
+vi App.java                         // Conflict is marked with <<<<<<<,=======,>>>>>>>
+                                    //  - Make appropriate changes
+
+  <<<<<<< HEAD
+          // add a comment here
+  =======
+          // ADD A COMMENT
+  >>>>>>> ADDED A COMMENT
+
+git add App.java                    // Add the file to the staging area
+git rebase --continue               // Continue the rebase
+git diff HEAD^1 HEAD                // Look at what changed in the latest commit
+git checkout master                 // Change to master branch
+git merge branch2                   // Merge changes from second branch to master
+git log                             // See that both changes are there
+
+
+Interactive Rebase
+
+git branch branch1                  // Create a branch
+git checkout branch1                // Checkout the branch
+vi App.java                         // Edit a file
+git commit -a -m "Added a comment"  // Create a commit
+git log                             // Look at the log
+git diff HEAD^1 HEAD                // Look a what changed in the latest commit
+vi App.java                         // Make another change to the file
+git diff                            // Look at what has changed
+git commit -a -m "add this"         // Create another commit
+git log                             // Look at the log and see both commits
+git rebase -i HEAD~4                // Run interactive rebase - brings up an editor
+                                    //  - The 4 says to use the last 4 commits. The
+                                    //    number doesn't matter much as long as you
+                                    //    get the commits you are interested in.
+                                    //  - Change "pick" to "fixup" or "squash"
+
+  pick 43b9ab5 ah, now greg committed and authored it. that's gotta be true, right?
+  pick c55d006 unsigned
+  pick c2efe89 Added a comment
+  fixup 95a3e56 add this
+
+  # Rebase d7bc4ca..95a3e56 onto d7bc4ca
+  #
+  # Commands:
+  #  p, pick = use commit
+  #  r, reword = use commit, but edit the commit message
+  #  e, edit = use commit, but stop for amending
+  #  s, squash = use commit, but meld into previous commit
+  #  f, fixup = like "squash", but discard this commit's log message
+  #  x, exec = run command (the rest of the line) using shell
+  #
+  # These lines can be re-ordered; they are executed from top to bottom.
+  #
+  # If you remove a line here THAT COMMIT WILL BE LOST.
+  #
+  # However, if you remove everything, the rebase will be aborted.
+  #
+  # Note that empty commits are commented out
+
+git log
+git diff HEAD^1 HEAD
+
+Patches
+
+git log                              // Look at the log to find commit id
+git format-patch -1 <commmit_id>     // Create the patch
+
+// Send the patch to someone
+
+// Apply the patch in a sandbox
+git apply <patch_file_name>          // Apply locally
+git diff                             // Look at local changes
+git log                              // Patch is not committed locally
+
+// Push the patch
+git apply --check <patch_file_name>  // Verify that the patch will apply
+git apply –-stat <patch_file_name>   // Verify white spaces (but does not fix them)
+git am –s <patch_file_name>          // Put your signature in the commit 
+git push                             // Push the patch
+
+Restore a Lost Commit
+
+git branch branch1                                    // Create a branch
+git checkout branch1                                  // Check out the branch
+vi App.java                                           // Edit a file
+git diff                                              // Look at the changes
+git commit -a -m "Added something really important"   // Commit changes and add commit comment
+git log                                               // Look at the commit
+git reset --hard <a_previous_commit>                  // Oops!
+git log                                               // Commit is not there
+vi App.java                                           // Changes are not in the file
+
+// Go back in your window and find the commit id
+
+git reset --hard <your_commit_id>                     // Reset to your commit
+git log                                               // Commit is back
+vi App.java                                           // Changes are back

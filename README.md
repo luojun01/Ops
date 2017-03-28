@@ -1,2 +1,2 @@
 # Ops
-This Repo uses to manage the operation.
+此仓库用于记录最佳实践的主流技术文章
